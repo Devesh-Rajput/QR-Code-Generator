@@ -1,4 +1,4 @@
-/* 1. Theme Variables (Dark Mode Default)    */
+/* Theme Variables */
 :root {
     --bg: #0f172a;
     --card: #0b1220;
@@ -12,34 +12,24 @@
     --glass-border: rgba(255, 255, 255, 0.06);
 }
 
-/* Light Theme Variables (Applied when body has .light class) */
 body.light {
     --bg: linear-gradient(180deg, #eef2ff, #f8fafc);
-    --card: linear-gradient(180deg, #ffffff, #fbfdff);
+    --card: linear-gradient(180deg, #fff, #fbfdff);
     --muted: #475569;
     --accent: #4f46e5;
-    --accent-2: #06b6d4;
     --glass: rgba(2, 6, 23, 0.03);
     --text: #0b1220;
-    --shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
-    --glass-border: rgba(15, 23, 42, 0.04);
+    --shadow: 0 12px 30px rgba(15, 23, 42, .08);
+    --glass-border: rgba(15, 23, 42, .04);
 }
 
-/* 2. Base & Layout                          */
-/* Base Reset and Typography */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    font-family: Poppins, system-ui
 }
 
-html,
-body {
-    height: 100%
-}
-
-/* Main body styling, centered content, theme transition */
 body {
     background: var(--bg);
     min-height: 100vh;
@@ -48,24 +38,22 @@ body {
     justify-content: center;
     padding: 28px;
     color: var(--text);
-    transition: background .35s ease, color .35s ease
+    transition: .35s
 }
 
-/* App Card Container (Grid Layout) */
 .card {
     width: 100%;
     max-width: 980px;
-    border-radius: var(--card-radius);
+    border-radius: 16px;
     background: var(--card);
     box-shadow: var(--shadow);
     padding: 28px;
     display: grid;
     grid-template-columns: 1fr 420px;
     gap: 28px;
-    align-items: start
+    overflow: hidden
 }
 
-/* Left Column - Controls */
 .controls {
     display: flex;
     flex-direction: column;
@@ -77,40 +65,28 @@ h1 {
     margin-bottom: 4px
 }
 
-p.lead {
+.lead {
     color: var(--muted);
     font-size: 14px
 }
 
-/* Input Styles */
 .input-row {
     display: flex;
     gap: 12px;
     align-items: center
 }
 
-.input-row input[type="text"] {
+.input-row input {
     flex: 1;
     height: 52px;
     padding: 12px 14px;
     border-radius: 12px;
-    border: 2px solid transparent;
     background: transparent;
     color: var(--text);
-    font-size: 15px;
-    outline: none;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02)
+    border: 2px solid transparent;
+    font-size: 15px
 }
 
-body.light .input-row input[type="text"] {
-    box-shadow: inset 0 1px 0 rgba(2, 6, 23, 0.03)
-}
-
-.input-row input::placeholder {
-    color: var(--muted)
-}
-
-/* Button Styles */
 .row-actions {
     display: flex;
     gap: 12px;
@@ -121,50 +97,25 @@ body.light .input-row input[type="text"] {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
     padding: 12px 16px;
-    border-radius: 12px;
     border: none;
-    cursor: pointer;
-    font-weight: 600
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer
 }
 
-/* Primary "Generate" Button */
 .btn.generate {
     background: linear-gradient(90deg, var(--accent), var(--accent-2));
     color: white;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     min-width: 160px
 }
 
-.btn.generate:active {
-    transform: translateY(1px)
-}
-
-/* Secondary Button (Theme Toggle) */
 .btn.secondary {
     background: var(--glass);
     border: 1px solid var(--glass-border);
-    color: var(--text);
-    min-width: 140px
+    color: var(--text)
 }
 
-.theme-toggle {
-    margin-left: auto;
-    display: flex;
-    gap: 8px;
-    align-items: center
-}
-
-/* Footer style */
-.footer {
-    margin-top: 6px;
-    font-size: 12px;
-    color: var(--muted);
-}
-
-/* 3. QR Preview Section                     */
-/* Right Column - Preview Container */
 .preview {
     display: flex;
     flex-direction: column;
@@ -172,39 +123,33 @@ body.light .input-row input[type="text"] {
     gap: 12px;
     padding: 12px;
     border-radius: 12px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent);
-    border: 1px solid rgba(255, 255, 255, 0.03)
+    background: rgba(255, 255, 255, 0.02)
 }
 
-/* Image Box and Transition Logic (controls show/hide of the QR code) */
 #imgBox {
     width: 360px;
     border-radius: 14px;
     max-height: 0;
     overflow: hidden;
-    transition: max-height .7s cubic-bezier(.2, .9, .2, 1), opacity .3s ease;
+    transition: .7s;
     padding: 0;
     border: 1px solid transparent
 }
 
 #imgBox.show-img {
-    max-height: 540px;
+    max-height: min(540px, 60vh);
     padding: 18px;
-    border-color: var(--glass-border);
-    opacity: 1
+    border-color: var(--glass-border)
 }
 
-/* Actual QR Image Styling and Animation */
 #qrImage {
     width: 100%;
-    display: block;
+    height: auto;
     border-radius: 10px;
-    background: linear-gradient(180deg, #fff, #fff);
-    box-shadow: 0 10px 30px rgba(2, 6, 23, 0.15);
-    transform-origin: center;
+    background: white;
     opacity: 0;
     transform: translateY(8px) scale(.98);
-    transition: opacity .35s ease, transform .4s cubic-bezier(.2, .9, .2, 1)
+    transition: .35s
 }
 
 #imgBox.show-img #qrImage {
@@ -212,47 +157,31 @@ body.light .input-row input[type="text"] {
     transform: none
 }
 
-/* Preview Metadata (size label) */
-.preview-meta {
+.preview-meta,
+.download-wrap {
+    width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 100%;
     gap: 12px
 }
 
-.note {
-    font-size: 13px;
-    color: var(--muted)
-}
-
-/* Download Button Container and Styling */
-.download-wrap {
-    display: flex;
-    gap: 12px;
-    width: 100%;
-    align-items: center
-}
-
-a.download {
+.download {
     flex: 1;
-    text-decoration: none;
     text-align: center;
     padding: 12px 14px;
     border-radius: 12px;
+    color: #fff;
     background: linear-gradient(90deg, var(--accent-2), var(--accent));
-    color: white;
-    font-weight: 700;
-    display: inline-block
+    text-decoration: none;
+    font-weight: 700
 }
 
-/* Disabled state for download button */
-a.download[aria-disabled='true'] {
+.download[aria-disabled="true"] {
     opacity: .5;
     pointer-events: none
 }
 
-/* Badge Option Chips */
 .options {
     display: flex;
     gap: 8px;
@@ -271,40 +200,16 @@ a.download[aria-disabled='true'] {
 
 .chip.active {
     background: linear-gradient(90deg, var(--accent), var(--accent-2));
-    color: white;
+    color: #fff;
     border: none
 }
 
-/* 4. Animations & Responsive Design         */
-/* Jiggle animation for feedback on successful generation */
-@keyframes jiggle {
-    0% {
-        transform: translateY(0)
-    }
-
-    50% {
-        transform: translateY(-6px)
-    }
-
-    100% {
-        transform: translateY(0)
-    }
-}
-
-.jiggle {
-    animation: jiggle .36s cubic-bezier(.2, .8, .2, 1)
-}
-
-/* Responsive adjustments for smaller screens */
-@media (max-width:920px) {
-
-    /* Stack columns vertically */
+@media(max-width:920px) {
     .card {
         grid-template-columns: 1fr;
         max-width: 680px
     }
 
-    /* Move preview above controls on mobile */
     .preview {
         order: -1
     }
@@ -314,16 +219,40 @@ a.download[aria-disabled='true'] {
     }
 }
 
-@media (max-width:480px) {
+@media(max-width:480px) {
     .card {
-        padding: 18px
+        padding: 12px;
+        gap: 12px
     }
 
-    .input-row input {
-        height: 48px
+    .row-actions,
+    .download-wrap {
+        flex-direction: column
     }
 
     .btn.generate {
-        min-width: 120px
+        width: 100%
+    }
+
+    #imgBox.show-img {
+        max-height: min(480px, 56vh);
+        padding: 12px
+    }
+
+    #qrImage {
+        max-width: 360px;
+        margin: auto
+    }
+}
+
+@media(max-width:360px) {
+    #imgBox.show-img {
+        max-height: min(400px, 52vh);
+        padding: 10px
+    }
+
+    .chip {
+        padding: 6px 8px;
+        font-size: 12px
     }
 }
