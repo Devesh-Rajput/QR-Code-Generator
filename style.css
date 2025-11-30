@@ -1,201 +1,218 @@
-/* style.css — Updated for better phone vertical responsiveness */
+/* style.css — Updated: vertical stacking & no horizontal scroll on phones */
 
 /* Theme Variables */
-:root {
-  --bg: #0f172a;
-  --card: #0b1220;
-  --muted: #94a3b8;
-  --accent: #7c3aed;
-  --accent-2: #06b6d4;
-  --glass: rgba(255,255,255,0.06);
-  --text: #e6eef8;
-  --card-radius: 16px;
-  --shadow: 0 15px 40px rgba(2,6,23,0.6);
-  --glass-border: rgba(255,255,255,0.06);
+:root{
+  --bg:#0f172a;
+  --card:#0b1220;
+  --muted:#94a3b8;
+  --accent:#7c3aed;
+  --accent-2:#06b6d4;
+  --glass:rgba(255,255,255,0.06);
+  --text:#e6eef8;
+  --card-radius:16px;
+  --shadow:0 15px 40px rgba(2,6,23,0.6);
+  --glass-border:rgba(255,255,255,0.06);
 }
-
-/* Light theme variables */
-body.light {
-  --bg: linear-gradient(180deg,#eef2ff,#f8fafc);
-  --card: linear-gradient(180deg,#fff,#fbfdff);
-  --muted: #475569;
-  --accent: #4f46e5;
-  --accent-2: #06b6d4;
-  --glass: rgba(2,6,23,0.03);
-  --text: #0b1220;
-  --shadow: 0 12px 30px rgba(15,23,42,0.08);
-  --glass-border: rgba(15,23,42,0.04);
+body.light{
+  --bg:linear-gradient(180deg,#eef2ff,#f8fafc);
+  --card:linear-gradient(180deg,#fff,#fbfdff);
+  --muted:#475569;
+  --accent:#4f46e5;
+  --accent-2:#06b6d4;
+  --glass:rgba(2,6,23,0.03);
+  --text:#0b1220;
+  --shadow:0 12px 30px rgba(15,23,42,.08);
+  --glass-border:rgba(15,23,42,.04);
 }
 
 /* Base */
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial; }
-html, body { height: 100%; }
-body {
-  background: var(--bg);
-  min-height: 100vh;
-  display: flex;
-  align-items: center;       /* changed to flex-start on phones in media query */
-  justify-content: center;
-  padding: 28px;
-  color: var(--text);
-  transition: background .35s ease, color .35s ease;
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Poppins',system-ui,-apple-system,Segoe UI,Roboto,Arial}
+html,body{height:100%}
+/* remove accidental horizontal scrolling on problematic browsers */
+html,body{overflow-x:hidden}
+body{
+  background:var(--bg);
+  min-height:100vh;
+  display:flex;
+  align-items:center; /* changed to top on mobile below */
+  justify-content:center;
+  padding:28px;
+  color:var(--text);
+  transition:background .35s ease,color .35s ease;
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
 }
 
-/* Card container — allow vertical scrolling inside on small screens */
-.card {
-  width: 100%;
-  max-width: 980px;
-  border-radius: var(--card-radius);
-  background: var(--card);
-  box-shadow: var(--shadow);
-  padding: 28px;
-  display: grid;
-  grid-template-columns: 1fr 420px;
-  gap: 28px;
-  align-items: start;
+/* Card */
+.card{
+  width:100%;
+  max-width:980px;
+  border-radius:var(--card-radius);
+  background:var(--card);
+  box-shadow:var(--shadow);
+  padding:28px;
+  display:grid;
+  grid-template-columns:1fr 420px;
+  gap:28px;
+  align-items:start;
 
-  /* IMPORTANT: allow internal scrolling and constrain card height to viewport */
-  max-height: calc(100vh - 56px); /* leave some breathing room for status bar / nav */
-  overflow: auto;                 /* scroll within the card instead of overflowing page */
+  /* restrict height and scroll internally on small viewports */
+  max-height:calc(100vh - 56px);
+  overflow:auto;
 }
 
 /* Controls */
-.controls { display:flex; flex-direction:column; gap:16px; }
-h1 { font-size:20px; margin-bottom:4px; }
-p.lead { color:var(--muted); font-size:14px; }
+.controls{display:flex;flex-direction:column;gap:16px}
+h1{font-size:20px;margin-bottom:4px}
+.lead{color:var(--muted);font-size:14px}
 
-/* Input row */
-.input-row { display:flex; gap:12px; align-items:center; }
-.input-row input[type="text"] {
-  flex:1; height:52px; padding:12px 14px; border-radius:12px; border:2px solid transparent;
-  background:transparent; color:var(--text); font-size:15px; outline:none;
+/* Input */
+.input-row{display:flex;gap:12px;align-items:center}
+.input-row input[type="text"]{
+  flex:1;height:52px;padding:12px 14px;border-radius:12px;border:2px solid transparent;
+  background:transparent;color:var(--text);font-size:15px;outline:none;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
 }
-body.light .input-row input[type="text"] { box-shadow: inset 0 1px 0 rgba(2,6,23,0.03); }
-.input-row input::placeholder { color: var(--muted); }
+body.light .input-row input[type="text"]{box-shadow: inset 0 1px 0 rgba(2,6,23,0.03)}
+.input-row input::placeholder{color:var(--muted)}
 
-/* Buttons */
-.row-actions { display:flex; gap:12px; align-items:center; }
-.btn { display:inline-flex; align-items:center; justify-content:center; gap:8px;
-  padding:12px 16px; border-radius:12px; border:none; cursor:pointer; font-weight:600; }
-.btn.generate { background: linear-gradient(90deg,var(--accent),var(--accent-2)); color:white; box-shadow: 0 8px 20px rgba(0,0,0,0.2); min-width:160px; }
-.btn.generate:active { transform: translateY(1px); }
-.btn.secondary { background: var(--glass); border:1px solid var(--glass-border); color:var(--text); min-width:140px; }
-.theme-toggle { margin-left:auto; display:flex; gap:8px; align-items:center; }
-.footer { margin-top:6px; font-size:12px; color:var(--muted); }
+/* Buttons & actions */
+.row-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px;border-radius:12px;border:none;cursor:pointer;font-weight:600}
+.btn.generate{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#fff;min-width:160px;box-shadow:0 8px 20px rgba(0,0,0,.2)}
+.btn.generate:active{transform:translateY(1px)}
+.btn.secondary{background:var(--glass);border:1px solid var(--glass-border);color:var(--text);min-width:140px}
+.theme-toggle{margin-left:auto;display:flex;gap:8px;align-items:center}
+.footer{margin-top:6px;font-size:12px;color:var(--muted)}
 
-/* Preview */
-.preview {
-  display:flex; flex-direction:column; align-items:center; gap:12px;
-  padding:12px; border-radius:12px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
-  border: 1px solid rgba(255,255,255,0.03);
+/* Preview column — STACK elements vertically */
+.preview{
+  display:flex;
+  flex-direction:column;    /* ensure vertical stacking inside preview */
+  align-items:center;
+  gap:12px;
+  padding:12px;
+  border-radius:12px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+  border:1px solid rgba(255,255,255,0.03);
+  width:100%;               /* take full width of column */
+  box-sizing:border-box;
 }
 
-/* Image box + transitions */
-#imgBox {
-  width: 360px;
-  border-radius: 14px;
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height .7s cubic-bezier(.2,.9,.2,1), opacity .3s ease;
-  padding: 0;
-  border: 1px solid transparent;
+/* Img box */
+#imgBox{
+  width:100%;               /* full width, will be capped by max-width of image */
+  max-width:360px;         /* visual cap on larger screens, removed on tiny screens via media queries */
+  border-radius:14px;
+  max-height:0;
+  overflow:hidden;
+  transition:max-height .7s cubic-bezier(.2,.9,.2,1), opacity .3s ease;
+  padding:0;
+  border:1px solid transparent;
 }
-#imgBox.show-img {
-  max-height: min(540px, 60vh);
-  padding: 18px;
-  border-color: var(--glass-border);
-  opacity: 1;
+#imgBox.show-img{
+  max-height:min(540px,60vh);
+  padding:18px;
+  border-color:var(--glass-border);
+  opacity:1;
 }
 
 /* QR image */
-#qrImage {
-  width: 100%;
-  height: auto;
-  display: block;
-  border-radius: 10px;
-  background: linear-gradient(180deg, #fff, #fff);
-  box-shadow: 0 10px 30px rgba(2,6,23,0.15);
-  transform-origin: center;
-  opacity: 0;
-  transform: translateY(8px) scale(.98);
-  transition: opacity .35s ease, transform .4s cubic-bezier(.2,.9,.2,1);
+#qrImage{
+  width:100%;
+  height:auto;
+  display:block;
+  border-radius:10px;
+  background:linear-gradient(180deg,#fff,#fff);
+  box-shadow:0 10px 30px rgba(2,6,23,0.15);
+  transform-origin:center;
+  opacity:0;
+  transform:translateY(8px) scale(.98);
+  transition:opacity .35s ease, transform .4s cubic-bezier(.2,.9,.2,1);
 }
-#imgBox.show-img #qrImage { opacity: 1; transform: none; }
+#imgBox.show-img #qrImage{opacity:1;transform:none}
 
-/* Meta + Download */
-.preview-meta { display:flex; justify-content:space-between; align-items:center; width:100%; gap:12px; }
-.note { font-size:13px; color:var(--muted); }
-.download-wrap { display:flex; gap:12px; width:100%; align-items:center; }
-a.download { flex:1; text-decoration:none; text-align:center; padding:12px 14px; border-radius:12px; background: linear-gradient(90deg,var(--accent-2),var(--accent)); color:white; font-weight:700; display:inline-block; }
-a.download[aria-disabled='true'] { opacity:.5; pointer-events:none; }
+/* Size label & preview meta */
+.preview-meta{display:flex;justify-content:space-between;align-items:center;width:100%;gap:12px;flex-wrap:wrap}
+.note{font-size:13px;color:var(--muted)}
+
+/* Download area should be below the image and full width */
+.download-wrap{
+  display:flex;
+  gap:12px;
+  width:100%;
+  align-items:center;
+  flex-direction:column; /* stack by default to ensure download is below image */
+}
+a.download{
+  width:100%;
+  max-width:360px;
+  text-decoration:none;
+  text-align:center;
+  padding:12px 14px;
+  border-radius:12px;
+  background:linear-gradient(90deg,var(--accent-2),var(--accent));
+  color:#fff;
+  font-weight:700;
+  display:inline-block;
+}
+a.download[aria-disabled='true']{opacity:.5;pointer-events:none}
 
 /* Chips */
-.options { display:flex; gap:8px; flex-wrap:wrap; }
-.chip { padding:8px 10px; border-radius:999px; background:var(--glass); border:1px solid var(--glass-border); font-size:13px; color:var(--muted); cursor:pointer; }
-.chip.active { background: linear-gradient(90deg,var(--accent),var(--accent-2)); color:white; border:none; }
+.options{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-start}
+.chip{padding:8px 10px;border-radius:999px;background:var(--glass);border:1px solid var(--glass-border);font-size:13px;color:var(--muted);cursor:pointer}
+.chip.active{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#fff;border:none}
 
 /* Animations */
-@keyframes jiggle { 0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)} }
-.jiggle { animation: jiggle .36s cubic-bezier(.2,.8,.2,1); }
+@keyframes jiggle{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}
+.jiggle{animation:jiggle .36s cubic-bezier(.2,.8,.2,1)}
 
-/* Responsive */
-@media (max-width: 920px) {
-  .card { grid-template-columns: 1fr; max-width: 680px; }
-  .preview { order: -1; }
-  #imgBox { width: 100%; }
+/* Responsive: two-column → single column on medium screens */
+@media (max-width:920px){
+  .card{grid-template-columns:1fr;max-width:680px}
+  .preview{order:-1}
+  #imgBox{width:100%;max-width:420px}
 }
 
-/* Phone specific: make card top-aligned, full-width, and easier to scroll */
-@media (max-width: 480px) {
-  body {
-    align-items: flex-start;      /* put card at top instead of vertically centered */
-    padding: 20px 12px;
+/* Phone: vertical layout, no horizontal scrolling, elements stacked */
+@media (max-width:480px){
+  body{align-items:flex-start;padding:20px 12px}
+  .card{
+    padding:16px;
+    gap:12px;
+    border-radius:12px;
+    width:100%;
+    max-width:100%;
+    max-height:calc(100vh - 32px);
   }
 
-  .card {
-    padding: 16px;
-    gap: 12px;
-    border-radius: 12px;
-    width: 100%;
-    max-width: 100%;
-    /* smaller max-height to account for browser chrome; keep scrolling inside card */
-    max-height: calc(100vh - 32px);
-  }
+  /* make controls and actions flow vertically */
+  .row-actions{flex-direction:column;align-items:stretch}
+  .download-wrap{flex-direction:column;align-items:stretch}
 
-  /* stack actions vertically so buttons don't overflow horizontally */
-  .row-actions, .download-wrap {
-    flex-direction: column;
-    align-items: stretch;
-  }
+  /* Generate button full width */
+  .btn.generate{width:100%;min-width:0}
 
-  .btn.generate { width: 100%; min-width: 0; }
+  /* make preview take full width and stack items in order:
+     image (full width) -> size label/meta -> download button -> chips */
+  .preview{align-items:stretch;padding:10px}
+  #imgBox.show-img{max-height:min(480px,56vh);padding:12px}
+  #imgBox{max-width:100%}
+  #qrImage{max-width:100%;height:auto;object-fit:contain;margin:0 auto}
 
-  #imgBox.show-img {
-    max-height: min(480px, 56vh);
-    padding: 12px;
-  }
+  /* ensure meta and chips wrap vertically */
+  .preview-meta{flex-direction:row;flex-wrap:wrap;justify-content:space-between}
+  .options{justify-content:flex-start}
 
-  #imgBox { width: 100%; }
-  #qrImage { width: 100%; max-width: 360px; height: auto; object-fit: contain; margin-left: auto; margin-right: auto; }
-
-  .preview { padding: 10px; border-radius: 10px; }
-  .input-row input[type="text"] { height: 48px; padding: 10px 12px; }
-
-  /* reduce size of chips and notes on very small screens */
-  .chip { padding: 6px 8px; font-size: 12px; }
-  .note { font-size: 12px; }
+  /* small touch-ups for tiny phones */
+  .chip{padding:6px 8px;font-size:12px}
+  .note{font-size:12px}
+  .input-row input[type="text"]{height:48px;padding:10px 12px}
 }
 
-/* Tiny screens */
-@media (max-width: 360px) {
-  #imgBox.show-img { max-height: min(400px, 52vh); padding: 10px; }
-  .chip { padding: 6px 8px; font-size: 12px; }
-  .note { font-size: 12px; }
+/* Very small screens (<=360px) */
+@media (max-width:360px){
+  #imgBox.show-img{max-height:min(400px,52vh);padding:10px}
+  .chip{padding:6px 8px;font-size:12px}
+  .note{font-size:12px}
 }
-
-/* Optional: if you still see horizontal scroll on some old Android browsers, uncomment below */
-/* html, body { overflow-x: hidden; } */
