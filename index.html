@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Enhanced Dynamic QR Code Generator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Universal Reset */
+    *{box-sizing:border-box;margin:0;padding:0;font-family:'Poppins',sans-serif}
+
+    /* Page background & center */
+    body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0f172a,#081028);padding:20px}
+
+    /* Card */
+    .container{width:100%;max-width:460px;background:linear-gradient(180deg,rgba(255,255,255,0.98),#ffffff);border-radius:16px;padding:28px;box-shadow:0 20px 40px rgba(2,6,23,0.6);position:relative;overflow:hidden}
+
+    h1{font-size:20px;color:#0f172a;text-align:center;margin-bottom:8px}
+    p{font-size:13px;color:#334155;text-align:center;margin-bottom:14px;font-weight:600}
+
+    /* Input row */
+    .row{display:flex;gap:10px}
+    input[type="text"]{flex:1;height:48px;padding:10px 14px;border-radius:10px;border:2px solid #4f46e5;outline:none;font-size:15px}
+    input[type="text"]::placeholder{color:#9ca3af}
+    input[type='text']:focus{box-shadow:0 0 10px rgba(79,70,229,0.15);border-color:#3730a3}
+
+    /* Buttons */
+    .controls{display:flex;gap:10px;margin-top:20px}
+    button, .download-btn{height:46px;padding:0 16px;border-radius:10px;border:none;cursor:pointer;font-weight:700}
+    .generate{flex:1;background:#4f46e5;color:white;transition:transform .12s ease,box-shadow .12s ease}
+    .generate:active{transform:translateY(1px) scale(.995)}
+
+    .download-btn{background:transparent;border:2px solid #e6e7ff;color:#f8fafc;min-width:120px}
+    .download-btn[disabled]{opacity:.5;cursor:not-allowed}
+
+    /* QR box */
+    #imgBox{width:240px;margin:18px auto 6px;border-radius:12px;max-height:0;overflow:hidden;transition:max-height .8s cubic-bezier(.2,.9,.2,1),opacity .4s ease;padding:0;border:2px solid transparent}
+    #imgBox.show-img{max-height:420px;padding:12px;border-color:#e6e6f9}
+
+    /* final QR preview image */
+    #qrImage{width:100%;display:block;border-radius:8px;box-shadow:0 8px 20px rgba(2,6,23,0.25);transform-origin:center;opacity:0;transform:scale(.96) translateY(10px);transition:opacity .4s ease,transform .4s cubic-bezier(.2,.9,.2,1)}
+    #imgBox.show-img #qrImage{opacity:1;transform:scale(1) translateY(0)}
+
+    /* small badges & labels */
+    .meta{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-top:10px}
+    .hint{font-size:12px;color:#475569}
+
+    /* error shake */
+    @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-4px)}}
+    input.error{animation:shake .5s ease}
+
+    /* subtle jiggle when generated */
+    @keyframes jiggle{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}
+    .jiggle{animation:jiggle .36s cubic-bezier(.2,.8,.2,1)}
+
+    /* micro interactions */
+    .small{font-size:12px;color:#64748b}
+
+    /* responsive tweaks */
+    @media (max-width:420px){.container{padding:18px}.row{flex-direction:column} .controls{flex-direction:column} .download-btn{min-width:100%}}
+  </style>
+</head>
+<body>
+  <div class="container" role="main">
+    <h1>Enhanced QR Code Generator</h1>
+    <p>Enter text or a URL, then generate. Download or style the QR before saving.</p>
+
+    <div class="row" style="margin-bottom:8px">
+      <input id="qrText" type="text" placeholder="https://example.com or any text" aria-label="Text to encode">
+    </div>
+
+    <div class="controls">
+      <button class="generate" id="generateBtn" type="button">Generate QR</button>
+      <a id="downloadBtn" class="download-btn" download="qr-code.png" href="#" role="button" aria-disabled="true">Download PNG</a>
+    </div>
+
+    <div id="imgBox" aria-hidden="true">
+      <!-- final image preview will be set here -->
+      <img id="qrImage" alt="Generated QR code preview">
+    </div>
+
+    <div class="meta">
+      <div class="hint small">Tip: keep the overlay small so the QR remains scannable.</div>
+      <div class="small" id="sizeLabel">180×180</div>
+    </div>
+
+    <!-- Hidden canvas used for composing/downloading the QR with styling -->
+    <canvas id="qrCanvas" width="420" height="420" style="display:none"></canvas>
+  </div>
+
+  <script>
+    // Elements
+    const imgBox = document.getElementById('imgBox');
+    const qrImage = document.getElementById('qrImage');
+    const qrText = document.getElementById('qrText');
+    const generateBtn = document.getElementById('generateBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const container = document.querySelector('.container');
+    const canvas = document.getElementById('qrCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Settings - you can tweak these
+    const outputSize = 420; // final PNG size in px (square)
+    const qrSize = 360; // size of QR drawn inside the canvas
+    const bgColor = '#ffffff'; // background for the final PNG
+    const borderRadius = 18; // rounded corner radius for the final image
+    const borderLineWidth = 6; // outer border
+    const borderColor = '#e6e6f9';
+
+    // Helper: draw rounded rectangle
+    function roundRect(ctx,x,y,w,h,r){
+      const min = Math.min(w,h) / 2;
+      if(r>min) r = min;
+      ctx.beginPath();
+      ctx.moveTo(x+r,y);
+      ctx.arcTo(x+w,y,x+w,y+h,r);
+      ctx.arcTo(x+w,y+h,x,y+h,r);
+      ctx.arcTo(x,y+h,x,y,r);
+      ctx.arcTo(x,y,x+w,y,r);
+      ctx.closePath();
+    }
+
+    // Generate the QR image URL (uses goqr.me / qrserver)
+    function qrApiUrl(data, size=180){
+      return 'https://api.qrserver.com/v1/create-qr-code/?size=' + size + 'x' + size + '&data=' + encodeURIComponent(data);
+    }
+
+    // Compose the QR onto a canvas (so we can style & download)
+    async function composeAndShow(url, overlayText){
+      // Ensure crossOrigin so we can draw
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      img.src = url;
+
+      // Wait for image to load (or fail)
+      await new Promise((res,rej)=>{
+        img.onload = res;
+        img.onerror = () => rej(new Error('Could not load QR image'));
+      });
+
+      // Set canvas dims
+      canvas.width = outputSize;
+      canvas.height = outputSize;
+
+      // Clear & draw background rounded white card
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.fillStyle = bgColor;
+      roundRect(ctx,0,0,canvas.width,canvas.height,borderRadius);
+      ctx.fill();
+
+      // Draw border
+      if(borderLineWidth>0){
+        ctx.lineWidth = borderLineWidth;
+        ctx.strokeStyle = borderColor;
+        roundRect(ctx, borderLineWidth/2, borderLineWidth/2, canvas.width - borderLineWidth, canvas.height - borderLineWidth, borderRadius);
+        ctx.stroke();
+      }
+
+      // Compute QR placement (centered)
+      const qrX = Math.round((canvas.width - qrSize)/2);
+      const qrY = Math.round((canvas.height - qrSize)/2) - 14; // slight lift
+      ctx.drawImage(img, qrX, qrY, qrSize, qrSize);
+
+      // Small styling: add a subtle gloss top-left
+      ctx.save();
+      const glossH = 40;
+      const grad = ctx.createLinearGradient(0,qrY,0,qrY+glossH);
+      grad.addColorStop(0,'rgba(255,255,255,0.28)');
+      grad.addColorStop(1,'rgba(255,255,255,0)');
+      ctx.fillStyle = grad;
+      roundRect(ctx, qrX + 6, qrY + 6, qrSize - 12, glossH, 8);
+      ctx.fill();
+      ctx.restore();
+
+      // Optional: small center overlay (a tiny badge) - keep it very small to keep QR scannable
+      if(overlayText){
+        const badgeSize = Math.round(qrSize * 0.16); // 16% of QR width
+        const bx = Math.round(canvas.width/2 - badgeSize/2);
+        const by = Math.round(canvas.height/2 - badgeSize/2) - 14;
+
+        // white circle with subtle shadow
+        ctx.save();
+        ctx.beginPath();
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = 'rgba(2,6,23,0.25)';
+        ctx.shadowBlur = 8;
+        ctx.arc(bx + badgeSize/2, by + badgeSize/2, badgeSize/2, 0, Math.PI*2);
+        ctx.fill();
+        ctx.restore();
+
+        // text inside
+        ctx.fillStyle = '#111827';
+        ctx.font = `${Math.round(badgeSize*0.48)}px Poppins, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(overlayText, bx + badgeSize/2, by + badgeSize/2 + 1);
+      }
+
+      // Finally convert to data URL and show
+      const dataUrl = canvas.toDataURL('image/png');
+      qrImage.src = dataUrl;
+
+      // Show container & enable download
+      imgBox.classList.add('show-img');
+      imgBox.setAttribute('aria-hidden','false');
+      downloadBtn.href = dataUrl;
+      downloadBtn.removeAttribute('aria-disabled');
+      downloadBtn.removeAttribute('disabled');
+
+      // update size label
+      document.getElementById('sizeLabel').textContent = qrSize + '×' + qrSize + ' (styled ' + outputSize + '×' + outputSize + ')';
+
+      // small visual pulse
+      container.classList.add('jiggle');
+      setTimeout(()=>container.classList.remove('jiggle'),420);
+    }
+
+    // Main function when user clicks generate
+    async function generateQR(){
+      const value = qrText.value.trim();
+      if(!value){
+        qrText.classList.add('error');
+        setTimeout(()=>qrText.classList.remove('error'),700);
+        imgBox.classList.remove('show-img');
+        downloadBtn.setAttribute('aria-disabled','true');
+        downloadBtn.setAttribute('disabled','');
+        return alert('Please enter text or a URL to generate a QR code.');
+      }
+
+      // Hide previous QR gracefully
+      imgBox.classList.remove('show-img');
+      downloadBtn.setAttribute('aria-disabled','true');
+      downloadBtn.setAttribute('disabled','');
+
+      // Build the API URL (we ask for a larger size so the canvas has a crisp result)
+      const apiSize = 800; // request a high-res QR and scale down on canvas
+      const apiUrl = qrApiUrl(value, apiSize);
+
+      // Attempt to compose the final styled image
+      try{
+        // We also build a tiny overlay badge text - first 2 chars of input or domain
+        let overlayText = '';
+        try{
+          const urlObj = new URL(value);
+          overlayText = (urlObj.hostname.split('.')[0] || value).slice(0,2).toUpperCase();
+        }catch(e){
+          overlayText = value.slice(0,2).toUpperCase();
+        }
+
+        await composeAndShow(apiUrl, overlayText);
+      }catch(err){
+        console.error(err);
+        alert('Could not generate QR image — API or network issue. Try again.');
+      }
+    }
+
+    // Wire up event listeners
+    generateBtn.addEventListener('click', generateQR);
+
+    // Also support Enter inside text field
+    qrText.addEventListener('keyup', (e)=>{ if(e.key==='Enter') generateQR(); });
+
+    // Safety: disable download if no data present at load
+    downloadBtn.setAttribute('disabled','');
+    downloadBtn.setAttribute('aria-disabled','true');
+
+  </script>
+</body>
+</html>
